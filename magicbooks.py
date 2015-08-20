@@ -69,15 +69,19 @@ def parse_args(argv=None):
                         help="List the best NUM combinations."
                             " [Default: %(default)s]")
 
+    parser.add_argument('-t', '--tokens',
+                        type=check_token, nargs=2, metavar=("LEFT", "RIGHT"),
+                        default=['0', '1'],
+                        help="Chapter tokens."
+                            " [Default: %(default)s]")
+
     parser.add_argument(dest='file', nargs="?", metavar="FILE",
-                        help="File to export to or import from."
-                            " [Default: stdout / stdin]")
+                        help="Library file to read books info from."
+                            " [Default: <stdin>]")
 
     args = parser.parse_args(argv)
+    args.tokens = "".join(args.tokens)
     args.debug = args.loglevel == logging.DEBUG
-    args.ltoken = 'E'
-    args.rtoken = 'D'
-    args.tokens = args.ltoken + args.rtoken
 
     return args
 
@@ -151,6 +155,14 @@ def main(argv=None):
                  " NO DUPLICATES, hooray! :D" if score==0 else "")
         for book in combo:
             log.info("\t%2d - %s", *book[:2])
+
+
+def check_token(token):
+    t = token.strip()
+    if len(t) != 1:
+        raise argparse.ArgumentTypeError(
+            "Chapter token must be a single non-space character: '%s'" % token)
+    return t
 
 
 @contextlib.contextmanager
