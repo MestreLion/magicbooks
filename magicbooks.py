@@ -90,9 +90,9 @@ def main(argv=None):
 
     with openstd(args.file, 'r') as (fd, name):
         log.debug("Reading from %s", name)
-        books = tuple([_i] + _.split('\n')[:3]
+        books = tuple([_i] + _.split('\n')[:2]
                       for _i, _ in
-                        enumerate(fd.read()[:-1].strip().split('\n\n'), 1)
+                        enumerate(fd.read().strip().split('\n\n'), 1)
                       if _.strip())
 
     if len(books) < args.books:
@@ -101,32 +101,32 @@ def main(argv=None):
         return 1
 
     if args.randomize:
-        books = tuple(_[:3] + ["".join(random.choice(args.tokens)
+        books = tuple(_[:2] + ["".join(random.choice(args.tokens)
                                        for _ in xrange(args.chapters))]
                       for _ in books)
 
     # Sanity tests
     for book in books:
         try:
-            idx, title, author, chapters = book
+            idx, title, chapters = book
         except ValueError:
             log.error("Data is incomplete for book: %s", book)
-            log.error("Requires Title, Author, and Chapter data"
-                      " (optional when using --randomize)")
+            log.error("Requires Title and Chapter data"
+                      " (chapters are optional when using --randomize)")
             return 1
 
         if not args.randomize and len(chapters) != 16:
             log.error("Book %s does not have %d chapters", book, args.chapters)
             return 1
 
-        log.info("Book %2d: %s, '%s' [%s]",
-                  idx, chapters, title, author)
+        log.info("Book %2d: %s, '%s'",
+                  idx, chapters, title)
 
     combos = []
     for combo in itertools.combinations(books, args.books):
-        log.debug(("\n%s\n" % "\n".join("%s\t%s" % (_[3], _[1])
+        log.debug(("\n%s\n" % "\n".join("%s\t%3d\t%s" % (_[2], _[0], _[1])
                                         for _ in combo)).rstrip())
-        data   = zip(*combo)[3]
+        data   = zip(*combo)[2]
         words  = ("".join(_) for _ in zip(*data))
         counts = collections.Counter(words)
         reps   = sorted((_ for _ in counts.values() if _ > 1),
