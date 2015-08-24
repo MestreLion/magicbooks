@@ -104,6 +104,9 @@ def main(argv=None):
         books = tuple(_[:2] + ["".join(random.choice(args.tokens)
                                        for _ in xrange(args.chapters))]
                       for _ in books)
+    else:
+        # Remove additional chapters, if any
+        books = tuple(_[:2] + [_[2][:args.chapters]] for _ in books)
 
     # Sanity tests
     for book in books:
@@ -115,8 +118,8 @@ def main(argv=None):
                       " (chapters are optional when using --randomize)")
             return 1
 
-        if not args.randomize and len(chapters) != 16:
-            log.error("Book %s does not have %d chapters", book, args.chapters)
+        if not args.randomize and len(chapters) < args.chapters:
+            log.error("Book %s needs at least %d chapters", book, args.chapters)
             return 1
 
         log.info("Book %2d: %s, '%s'",
@@ -150,8 +153,6 @@ def main(argv=None):
             log.info("\t%2d - %s", *book[:2])
 
 
-
-
 @contextlib.contextmanager
 def openstd(filename=None, mode="r"):
     if filename and filename != '-':
@@ -169,8 +170,6 @@ def openstd(filename=None, mode="r"):
     finally:
         if fh is not sys.stdout:
             fh.close()
-
-
 
 
 if __name__ == '__main__':
