@@ -96,7 +96,8 @@ def main(argv=None):
         log.debug("Reading from %s", name)
         books = tuple([_i] + _.split('\n')[:2]
                       for _i, _ in
-                        enumerate(fd.read().strip().split('\n\n'), 1)
+                        enumerate(fd.read().replace('\r', '').strip()
+                                  .split('\n\n'), 1)
                       if _.strip())
 
     if len(books) < args.books:
