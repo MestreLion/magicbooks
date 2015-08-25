@@ -135,24 +135,29 @@ def main(argv=None):
         log.debug(("\n%s\n" % "\n".join("%s\t%3d\t%s" % (_[2], _[0], _[1])
                                         for _ in combo)).rstrip())
         data   = tuple(zip(*combo))[2]
-        words  = ("".join(_) for _ in zip(*data))
+        words  = tuple("".join(_) for _ in zip(*data))
         counts = collections.Counter(words)
+        ewords = tuple((_i+1, _w) for _i, _w in enumerate(words))
+        chaps  = sorted(tuple(_[0] for _ in ewords if _[1]==_w)
+                        for _w in set(words)
+                        if counts[_w] > 1)
         reps   = sorted((_ for _ in counts.values() if _ > 1),
                         reverse=True)
         score = sum(reps) - len(reps)
 
-        combos.append((score, reps, combo))
+        combos.append((score, chaps, combo))
 
         log.debug(counts)
-        log.debug("Score: %2d  %s", score, reps)
+        log.debug("Score: %2d  %s %s", score, chaps, reps)
 
     log.info("")
     log.info("Best %s out of %d combinations of %d books in %d:",
              args.list, len(combos), args.books, len(books))
 
-    for score, reps, combo in sorted(combos)[:args.list]:
+    for score, chaps, combo in sorted(combos)[:args.list]:
         log.info("")
-        log.info("Dupes: %s (Total %d)%s", reps, score,
+        log.info("DupeScore™: %d, chapters %s%s",
+                 score, chaps,
                  " NO DUPLICATES, hooray! :D" if score==0 else "")
         for book in combo:
             log.info("\t%2d - %s", *book[:2])
