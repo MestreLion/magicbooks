@@ -107,7 +107,7 @@ def main(argv=None):
 
     if args.randomize:
         books = tuple(_[:2] + ["".join(random.choice(args.tokens)
-                                       for _ in xrange(args.chapters))]
+                                       for _ in range(args.chapters))]
                       for _ in books)
     else:
         # Remove additional chapters, if any
@@ -134,7 +134,7 @@ def main(argv=None):
     for combo in itertools.combinations(books, args.books):
         log.debug(("\n%s\n" % "\n".join("%s\t%3d\t%s" % (_[2], _[0], _[1])
                                         for _ in combo)).rstrip())
-        data   = zip(*combo)[2]
+        data   = tuple(zip(*combo))[2]
         words  = ("".join(_) for _ in zip(*data))
         counts = collections.Counter(words)
         reps   = sorted((_ for _ in counts.values() if _ > 1),
