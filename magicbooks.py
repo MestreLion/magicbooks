@@ -151,8 +151,8 @@ def main(argv=None):
         log.debug("Score: %2d  %s %s", score, chaps, reps)
 
     log.info("")
-    log.info("Best %s out of %d combinations of %d books in %d:",
-             args.list, len(combos), args.books, len(books))
+    log.info("Best %s out of %d combinations of %d books in %d with %d chapters:",
+             args.list, len(combos), args.books, len(books), args.chapters)
 
     for score, chaps, combo in sorted(combos)[:args.list]:
         log.info("")
