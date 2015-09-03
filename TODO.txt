@@ -1,0 +1,15 @@
+- Statistical analysis (using fake data)
+- Force some books (by index): -f/--force 1,2,3...
+- Windows/DOS launcher
+- Auto-detect "ANSI" encoding in input file
+	handle EOL CR/CRLF as well?
+- UTF-8 in Windows terminal
+	exception when using chcp 65001 in batch launcher
+- Limit library size: -l/--library NUM
+	important for statistical analysis
+- Change current -l/--list to -t/--top
+	so it does not clash with new -l/--library
+- use config file for default options
+	magicbooks.conf
+	useful in windows/android where command-line arguments is hard
+	look in (or merge from) XDG_DATA_HOME/magicbooks and current dir
