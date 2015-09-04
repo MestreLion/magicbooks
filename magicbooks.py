@@ -29,9 +29,42 @@ import contextlib
 import random
 import itertools
 import collections
+import json
+try:
+    from ConfigParser import SafeConfigParser as ConfigParser  # Python 2
+except ImportError:
+    from configparser import ConfigParser  # Python 3
 
 
-log = logging.getLogger(os.path.basename(os.path.splitext(__file__)[0]))
+MYNAME = "magicbooks"  # os.path.basename(os.path.splitext(__file__)[0])
+MYDIR  = sys.path[0]   # Safer than `os.path.dirname(__file__)`
+CONFIG = os.path.join(MYDIR, "%s.ini" % MYNAME)
+
+log = logging.getLogger(MYNAME)
+
+
+def read_config(path, defaults):
+    config = ConfigParser({_k:str(_v) for _k, _v in defaults.items()},
+                          allow_no_value=True)
+
+    if not config.read(path):
+        with open(path, 'w') as f:
+            config.write(f)
+        return {}
+
+    def getlist(s, o):
+        return [str(_) for _ in json.loads(config.get(s, o).replace("'", '"'))]
+
+    options = {}
+    for option, value in defaults.items():
+        get = config.get
+        if   type(value) == int:   get = config.getint
+        elif type(value) == float: get = config.getfloat
+        elif type(value) == bool:  get = config.getboolean
+        elif type(value) == list:  get = getlist
+        options[option] = get("DEFAULT", option)  # configparser.DEFAULTSECT
+
+    return options
 
 
 def parse_args(argv=None, defaults=None):
@@ -86,6 +119,7 @@ def parse_args(argv=None, defaults=None):
 
 
 def main(argv=None):
+    logging.basicConfig(format='%(levelname)s: %(message)s')
     defaults = dict(
         loglevel  = logging.INFO,
         list      =  1,
@@ -93,11 +127,12 @@ def main(argv=None):
         chapters  = 16,
         randomize = False,
         tokens    = ['0', '1'],
-        file      = "",
+        file      = os.path.join(os.path.abspath(MYDIR), "books.txt")
     )
+    defaults.update(read_config(CONFIG, defaults))
     args = parse_args(argv, defaults)
-    logging.basicConfig(level=args.loglevel,
-                        format='%(levelname)s: %(message)s')
+    log.setLevel(args.loglevel)
+    log.debug("Using config file: %s", CONFIG)
     log.debug(args)
 
     with openstd(args.file, 'r') as (fd, name):
