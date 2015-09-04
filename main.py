@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#qpy:console
 #
 #    Copyright (C) 2015 Rodrigo Silva (MestreLion) <linux@rodrigosilva.com>
 #
@@ -34,6 +35,13 @@ try:
     from ConfigParser import SafeConfigParser as ConfigParser  # Python 2
 except ImportError:
     from configparser import ConfigParser  # Python 3
+try:
+    import androidhelper as android  # QPython
+except ImportError:
+    try:
+        import android  # Original SL4A
+    except ImportError:
+        android = None
 
 
 MYNAME = "magicbooks"  # os.path.basename(os.path.splitext(__file__)[0])
@@ -197,13 +205,32 @@ def main(argv=None):
     log.info("Best %s out of %d combinations of %d books in %d with %d chapters:",
              args.list, len(combos), args.books, len(books), args.chapters)
 
+    minscore = args.chapters
     for score, chaps, combo in sorted(combos)[:args.list]:
+        minscore = min(score, minscore)
+        msg = ""
+        if score == 0:
+            msg = " NO DUPLICATES, hooray! :D"
+
         log.info("")
-        log.info("DupeScore™: %d, chapters %s%s",
-                 score, chaps,
-                 " NO DUPLICATES, hooray! :D" if score==0 else "")
+        log.info("DupeScore™: %d, chapters %s%s", score, chaps, msg)
         for book in combo:
             log.info("\t%2d - %s", *book[:2])
+
+    if not android:
+        return
+
+    droid = android.Android()
+    if minscore == 0:
+        msg = "You've found the perfect books, CONGRATULATIONS!"
+        droid.makeToast(msg)
+        droid.ttsSpeak(msg)
+
+    elif minscore == 1:
+        droid.makeToast("Almost there!")
+
+    else:
+        droid.makeToast("Meh, keep searching...")
 
 
 def check_token(token):
