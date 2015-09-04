@@ -34,13 +34,12 @@ import collections
 log = logging.getLogger(os.path.basename(os.path.splitext(__file__)[0]))
 
 
-def parse_args(argv=None):
+def parse_args(argv=None, defaults=None):
     parser = argparse.ArgumentParser(
         description=__doc__)
 
     parser.add_argument('-q', '--quiet', dest='loglevel',
                         const=logging.WARNING,
-                        default=logging.INFO,
                         action="store_const",
                         help="Suppress informative messages.")
 
@@ -49,35 +48,35 @@ def parse_args(argv=None):
                         action="store_const",
                         help="Verbose mode, output extra info.")
 
-    parser.add_argument( '-b', '--books', default=4,
+    parser.add_argument( '-b', '--books',
                         type=int, metavar="NUM",
                         help="How many books to choose."
                             " [Default: %(default)s]")
 
-    parser.add_argument( '-c', '--chapters', default=16,
+    parser.add_argument( '-c', '--chapters',
                         type=int, metavar="NUM",
                         help="How many chapters per book."
                             " [Default: %(default)s]")
 
     parser.add_argument('-r', '--randomize',
-                        default=False,
                         action="store_true",
                         help="Randomize book data.")
 
-    parser.add_argument( '-l', '--list', default=1,
+    parser.add_argument( '-l', '--list',
                         type=int, metavar="NUM",
                         help="List the best NUM combinations."
                             " [Default: %(default)s]")
 
     parser.add_argument('-t', '--tokens',
                         type=check_token, nargs=2, metavar=("LEFT", "RIGHT"),
-                        default=['0', '1'],
                         help="Chapter tokens."
                             " [Default: %(default)s]")
 
     parser.add_argument(dest='file', nargs="?", metavar="FILE",
                         help="Library file to read books info from."
                             " [Default: <stdin>]")
+
+    parser.set_defaults(**(defaults or {}))
 
     args = parser.parse_args(argv)
     args.tokens = "".join(args.tokens)
@@ -87,7 +86,16 @@ def parse_args(argv=None):
 
 
 def main(argv=None):
-    args = parse_args(argv)
+    defaults = dict(
+        loglevel  = logging.INFO,
+        list      =  1,
+        books     =  4,
+        chapters  = 16,
+        randomize = False,
+        tokens    = ['0', '1'],
+        file      = "",
+    )
+    args = parse_args(argv, defaults)
     logging.basicConfig(level=args.loglevel,
                         format='%(levelname)s: %(message)s')
     log.debug(args)
