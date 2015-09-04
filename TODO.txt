@@ -9,7 +9,7 @@
 	important for statistical analysis
 - Change current -l/--list to -t/--top
 	so it does not clash with new -l/--library
-- use config file for default options
-	magicbooks.conf
-	useful in windows/android where command-line arguments is hard
-	look in (or merge from) XDG_DATA_HOME/magicbooks and current dir
+- Improve error handling of malformed user input in  config file
+- config file options should match user-visible args, not internal ones
+	So use verbose, debug, etc instead of loglevel
+- In Linux, use xdg.BaseDirectory for config file location
